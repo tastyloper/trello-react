@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { Container, Draggable } from "react-smooth-dnd";
+import './App.scss';
+import 'font-awesome/css/font-awesome.min.css';
 
 const applyDrag = (arr, dragResult) => {
   const { removedIndex, addedIndex, payload } = dragResult;
@@ -19,8 +21,12 @@ const applyDrag = (arr, dragResult) => {
   return result;
 };
 
+const bgColors = ['#0079BF', '#D29034', '#4BBF6B', '#B03642'];
+
 class App extends Component {
   state = {
+    bgColor: '#0079BF',
+    colorBoolean: false,
     trello: {
       type: 'container',
       props: {
@@ -143,68 +149,94 @@ class App extends Component {
     }
   }
 
+  toggleBGMenu = () => {
+    this.setState({ colorBoolean: true });
+  }
+
+  changeBgColor(bgColor) {
+    this.setState({ colorBoolean: false, bgColor });
+  }
+
   render() {
     return (
-      <div className="card-trello">
-        <Container
-          orientation="horizontal"
-          onDrop={this.onColumnDrop}
-          dragHandleSelector=".column-drag-handle"
-          dropPlaceholder={{
-            animationDuration: 150,
-            showOnTop: true,
-            className: 'cards-drop-preview'
-          }}
-        >
-          {this.state.trello.children.map(column => {
-            return (
-              <Draggable key={column.id}>
-                <div className={column.props.className}>
-                  <div className="card-column-header">
-                    <span className="column-drag-handle">&#x2630;</span>
-                    {column.title}
+      <section className="wrapper" style={{ backgroundColor: this.state.bgColor }}>
+        <header>
+          <h1 className="logo"><i className="fa fa-trello"></i> Trello</h1>
+          <button className="bg-change-btn" onClick={this.toggleBGMenu}>
+            <i className="fa fa-paint-brush"></i>
+          </button>
+          {this.state.colorBoolean
+            ? (
+              <div className="bg-change-box">
+                {bgColors.map((color , i) => {
+                  return <div key={i} className="color-picker" style={{ backgroundColor: color }} onClick={() => this.changeBgColor(color)}></div>;
+                })}
+              </div>
+            )
+            : ''
+          }
+        </header>
+        <div className="card-trello">
+          <Container
+            orientation="horizontal"
+            onDrop={this.onColumnDrop}
+            dragHandleSelector=".column-drag-handle"
+            dropPlaceholder={{
+              animationDuration: 150,
+              showOnTop: true,
+              className: 'cards-drop-preview'
+            }}
+          >
+            {this.state.trello.children.map(column => {
+              return (
+                <Draggable key={column.id}>
+                  <div className={column.props.className}>
+                    <div className="card-column-header">
+                      <span className="column-drag-handle">&#x2630;</span>
+                      {column.title}
+                    </div>
+                    <Container
+                      {...column.props}
+                      groupName="col"
+                      onDragStart={e => console.log("drag started", e)}
+                      onDragEnd={e => console.log("drag end", e)}
+                      onDrop={e => this.onCardDrop(column.id, e)}
+                      getChildPayload={index =>
+                        this.getCardPayload(column.id, index)
+                      }
+                      dragClass="card-ghost"
+                      dropClass="card-ghost-drop"
+                      onDragEnter={() => {
+                        console.log("drag enter:", column.id);
+                      }}
+                      onDragLeave={() => {
+                        console.log("drag leave:", column.id);
+                      }}
+                      onDropReady={p => console.log('Drop ready: ', p)}
+                      dropPlaceholder={{                      
+                        animationDuration: 150,
+                        showOnTop: true,
+                        className: 'drop-preview' 
+                      }}
+                      dropPlaceholderAnimationDuration={200}
+                    >
+                      {column.children.map(card => {
+                        return (
+                          <Draggable key={card.id}>
+                            <div {...card.props}>
+                              <p>{card.title}</p>
+                            </div>
+                          </Draggable>
+                        );
+                      })}
+                    </Container>
                   </div>
-                  <Container
-                    {...column.props}
-                    groupName="col"
-                    onDragStart={e => console.log("drag started", e)}
-                    onDragEnd={e => console.log("drag end", e)}
-                    onDrop={e => this.onCardDrop(column.id, e)}
-                    getChildPayload={index =>
-                      this.getCardPayload(column.id, index)
-                    }
-                    dragClass="card-ghost"
-                    dropClass="card-ghost-drop"
-                    onDragEnter={() => {
-                      console.log("drag enter:", column.id);
-                    }}
-                    onDragLeave={() => {
-                      console.log("drag leave:", column.id);
-                    }}
-                    onDropReady={p => console.log('Drop ready: ', p)}
-                    dropPlaceholder={{                      
-                      animationDuration: 150,
-                      showOnTop: true,
-                      className: 'drop-preview' 
-                    }}
-                    dropPlaceholderAnimationDuration={200}
-                  >
-                    {column.children.map(card => {
-                      return (
-                        <Draggable key={card.id}>
-                          <div {...card.props}>
-                            <p>{card.title}</p>
-                          </div>
-                        </Draggable>
-                      );
-                    })}
-                  </Container>
-                </div>
-              </Draggable>
-            );
-          })}
-        </Container>
-      </div>
+                </Draggable>
+              );
+            })}
+          </Container>
+        </div>
+      </section>
     );
   }
 }
