@@ -96,6 +96,7 @@ header {
 .smooth-dnd-container.horizontal {
   display: inline-block;
   overflow: hidden;
+  min-width: auto;
   height: 100%;
   margin-left: 4px;
   vertical-align: top;
