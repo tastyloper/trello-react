@@ -172,6 +172,7 @@ class App extends Component {
           e.target.classList.contains('add-btn') ||
           e.target.classList.contains('card-composer'))) {
       this.setState({ addListOpen: false });
+      this.inputRef.current.value = '';
     }
   }
 
