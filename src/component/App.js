@@ -193,8 +193,19 @@ class App extends Component {
     this.setState({ listTilteEdit: '-1' });
   }
 
-  listTitleChange = (e) => {
-    console.dir(e.target);
+  listTitleChange = (e, listId) => {
+    const title = e.target.value;
+    if (!title.trim()) return;
+    this.setState(prevState => {
+      return {
+        trello: {
+          ...prevState.trello,
+          children: [...prevState.trello.children].map(list => {
+            return list.id === listId ? { ...list, title } : list
+          })
+        },
+      };
+    });
   }
 
   cardTitleResize = (e, listId) => {
@@ -314,7 +325,7 @@ class App extends Component {
             ? (
               <div className="bg-change-box">
                 {bgColors.map((color , i) => {
-                  return <div key={i} className="color-picker" style={{ backgroundColor: color }} onClick={() => this.changeBgColor(color)}></div>;
+                  return <div key={i} className="color-picker" style={{ backgroundColor: color }} onClick={() => (this.changeBgColor(color))}></div>;
                 })}
               </div>
             )
@@ -342,10 +353,11 @@ class App extends Component {
                     <div className={`card-column-header${this.state.listTilteEdit === column.id ? ' is-edit' : ''}`}>
                       <span
                         className="column-drag-handle"
-                        onClick={(e) => this.listTitleOpen(e, column.id)}
+                        onClick={(e) => (this.listTitleOpen(e, column.id))}
                       ></span>
-                      <textarea className="list-title" value={column.title} onChange={this.listTitleChange} onBlur={this.listTitleClose}></textarea>
-                      <button className="list-delete-btn" onClick={() => this.removeList(column.id)}>
+                      <textarea className="list-title" value={column.title} onChange={(e) => (this.listTitleChange(e, column.id))}
+                        onBlur={this.listTitleClose}></textarea>
+                      <button className="list-delete-btn" onClick={() => (this.removeList(column.id))}>
                         <i className="fa fa-trash-o"></i>
                         </button>
                     </div>
